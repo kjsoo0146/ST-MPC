@@ -1,14 +1,13 @@
 function param = param_setup()
-
 %==========================================================================
 %Heemels version
-    param.Tsim = 100;
+    param.Tsim = 20;
 
     param.A = [1.1 2; 0 0.95];
     param.B = [0; 0.0787];
     param.C = [-1 1];
     param.x0 = [6; -0.5];
-    param.N = 10;
+    param.N = 5;
     param.M = 5; % 트리거 인터벌의 최대값
     
     param.state_upperbound = 8;
@@ -16,6 +15,7 @@ function param = param_setup()
     param.input_upperbound = 1;
     param.input_lowerbound = -1;
 
+    param.NumOfConstr = 6;
     param.F = [1/param.state_upperbound 0; 0 1/param.state_upperbound; 1/param.state_lowerbound 0; 0 1/param.state_lowerbound; 0 0; 0 0];
     param.G = [0;0;0;0; 1/param.input_upperbound; 1/param.input_lowerbound];
 
@@ -51,18 +51,20 @@ function param = param_setup()
 
     tildeF = [];
     tildeG = [];
+    param.FNT = [param.F param.G];
+    param.FT = [param.F zeros(param.NumOfConstr, param.nu)];
     for i = 1:param.M-1
-        tildeF = blkdiag(tildeF, FNT);
+        tildeF = blkdiag(tildeF, param.FNT);
         tildeG = [tildeG; zeros(param.nc,1)];
     end
-    tildeF = blkdiag(tildeF,FT);
+    tildeF = blkdiag(tildeF,param.FT);
     tildeG = [tildeG;param.G];
 
     param.tildeF = tildeF;
     param.tildeG = tildeG;
 
-    QNT = [param.Q,zeros(nx, nu); zeros(nu, nx) param.R];
-    QT = [param.Q,zeros(nx, nu); zeros(nu, nx) zeros(nu, nu)];
+    QNT = [param.Q,zeros(param.nx, param.nu); zeros(param.nu, param.nx) param.R];
+    QT = [param.Q,zeros(param.nx, param.nu); zeros(param.nu, param.nx) zeros(param.nu, param.nu)];
 
     tildeQ = [];
     for i = 1:param.M-1
