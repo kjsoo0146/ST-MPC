@@ -1,5 +1,7 @@
 function param = param_setup()
-    
+
+%==========================================================================
+%Heemels version
     param.Tsim = 100;
 
     param.A = [1.1 2; 0 0.95];
@@ -30,6 +32,48 @@ function param = param_setup()
     param.P = P;
     param.K = K;
     param.Tset = 4;
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     param.beta = 1.1;
+%==========================================================================
+%autometica version
+    z = zeros(param.nx + param.nu,param.nx + param.nu);
+    AT = [param.A zeros(param.nx,param.nu); zeros(param.nu,param.nx) zeros(param.nu,param.nu)];
+    ANT = [param.A param.B; zeros(param.nu, param.nx) eye(param.nu)];
+    BT = [param.B;eye(param.nu)];
+
+    tildeA = [];
+    tildeB = [];
+    for i = 1:param.M
+        tildeA = [tildeA; [zeros((param.nx + param.nu),(param.nx + param.nu)*(param.M-1)) ANT^(i-1)*AT]];
+        tildeB = [tildeB; ANT^(i-1)*BT];
+    end
+    param.tildeA = tildeA;
+    param.tildeB = tildeB;
+
+    tildeF = [];
+    tildeG = [];
+    for i = 1:param.M-1
+        tildeF = blkdiag(tildeF, FNT);
+        tildeG = [tildeG; zeros(param.nc,1)];
+    end
+    tildeF = blkdiag(tildeF,FT);
+    tildeG = [tildeG;param.G];
+
+    param.tildeF = tildeF;
+    param.tildeG = tildeG;
+
+    QNT = [param.Q,zeros(nx, nu); zeros(nu, nx) param.R];
+    QT = [param.Q,zeros(nx, nu); zeros(nu, nx) zeros(nu, nu)];
+
+    tildeQ = [];
+    for i = 1:param.M-1
+        tildeQ = blkdiag(tildeQ,QNT);
+    end
+    tildeQ = blkdiag(tildeQ,QT);
+    param.tildeQ = tildeQ;
+    % [QNT z z; z QNT z ; z z QT];
+
+    [tildeP, tildeK, L] = idare(param.tildeA, param.tildeB, param.tildeQ, param.R);
+
+    param.tildeP = tildeP;
+    param.tildeK = tildeK;
 end
