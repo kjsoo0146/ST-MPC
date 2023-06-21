@@ -8,7 +8,6 @@ R = param.R;
 F = param.F;
 G = param.G;
 [P K L] = idare(A,B,Q,R);
-
 probT1 = optimproblem('ObjectiveSense', 'max' );
 probT2 = optimproblem('ObjectiveSense', 'max' );
 probT3 = optimproblem('ObjectiveSense', 'max' );

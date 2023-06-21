@@ -78,4 +78,10 @@ function param = param_setup()
 
     param.tildeP = tildeP;
     param.tildeK = tildeK;
+    % SizeOfTildeK = size(tildeK);
+    % ka = tildeK(:)
+    % PSI = []
+    % for i = 0:M-1;
+    %     PSI = [PSI; ANT^(i)*(AT+BT*Ka)]
+
 end
