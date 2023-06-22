@@ -78,10 +78,14 @@ function param = param_setup()
 
     param.tildeP = tildeP;
     param.tildeK = tildeK;
-    % SizeOfTildeK = size(tildeK);
-    % ka = tildeK(:)
-    % PSI = []
-    % for i = 0:M-1;
-    %     PSI = [PSI; ANT^(i)*(AT+BT*Ka)]
+
+
+    param.SizeOfTildeK = size(param.tildeK);
+    param.Ka = param.tildeK(1,(param.M-1)*(param.nx+param.nu)+1:param.SizeOfTildeK(2));
+    param.Kx = param.Ka(1,1:param.nx);
+
+    A_BK = tildeA - tildeB*tildeK;
+    param.SizeOfA_BK = size(A_BK)
+    param.phi = A_BK(:,(param.M-1)*(param.nx+param.nu)+1:param.SizeOfA_BK(2)); 
 
 end
