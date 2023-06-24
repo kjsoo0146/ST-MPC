@@ -1,4 +1,4 @@
-function [nTM, u, t] = autometica_mpc(TM, Nl, x)
+function [nTM, u, t] = autometica_mpc(TM, Nl, state)
 
     coder.extrinsic("optimconstr", "optimproblem", "optimvar");
 %==========================================================================
@@ -29,7 +29,7 @@ function [nTM, u, t] = autometica_mpc(TM, Nl, x)
     for i=1:param.N-1
         model_constr(i+1) = x(:,i+1) == param.A*x(:,i) + param.B*u(:,i);
     end
-    model_constr((param.N)+1) = x0 == x;
+    model_constr((param.N)+1) = x0 == state;
     prob.Constraints.model_constr = model_constr;
     
 %==========================================================================
@@ -51,46 +51,56 @@ function [nTM, u, t] = autometica_mpc(TM, Nl, x)
     SizeOfTmcomp = size(tmcomp);
     triggering_constr = optimconstr(param.N);
     triggering_constr(1) = u0 == u(:,1);
-    for i = 1:param.N-2
-        triggering_constr(i+1) = u(:,i)==u(:,i+1); %% i+1에서 triggering하면 u(:,i)~=u(:,i+1)
-    end
-    for i = 1:SizeOfTmcomp %% required triggering time moment setting
-        if tmcomp(i)==1
-            triggering_constr(tmcopm(i)) = u0 ~= u(:,1);
-        else
-            triggering_constr(tmcomp(i)) =  u(:,tmcomp(i)-1) ~= u(:,tmcomp(i));
-        end
-    end
+    % for i = 1:param.N-2
+    %     triggering_constr(i+1) = u(:,i)==u(:,i+1); %% i+1에서 triggering하면 u(:,i)~=u(:,i+1)
+    % end
+    % for i = 1:SizeOfTmcomp %% required triggering time moment setting
+    %     if tmcomp(i)==1
+    %         triggering_constr(tmcopm(i)) = u0 ~= u(:,1);
+    %     else
+    %         triggering_constr(tmcomp(i)) =  u(:,tmcomp(i)-1) ~= u(:,tmcomp(i));
+    %     end
+    % end
     nontmcomp = find(~tm); 
     SizeOfnontmcomp = size(nontmcomp);
-%==========================================================================
-% implementing QP
 %--------------------------------------------------------------------------
-% +0
-    original_tm = tm;
-    for a= 0:SizeOfnontmcomp %% 트리거 횟수 추가
-        for b = 0:a 
-            fvalArr = [];
-            solArr = [];
-            tmarr = []
-            ttime =a;
-            % while(1)
-            %      이전 스텝에서 받은 required trigger time moment sequence에서 trigger일때를 1 nontrigger 일때를 0으로 하여 벡터로 만들었다.
-            %      이때 QP가 feasible 해질 때까지 trigger time을 추가하면서 QP를 풀어야 하는데, 즉 a =0,1,.... time sequence에서 a개의 nontrigger time을 뽑아 trigger time으로 변환해서 
-            %      QP를 풀어함...
-            % end
-            
-        end
+% nontrigger time moment in time sequence case 분류
+%--------------------------------------------------------------------------
+% 9
+    tmarr = [];
+    switch SizeOfnontmcomp
+        case 9
+            tmarr = trigger_plus_9(tm)
+        case 8
+            tmarr = trigger_plus_8(tm)
+        case 7
+            tmarr = trigger_plus_7(tm)
+        case 6
+            tmarr = trigger_plus_6(tm)
+        case 5
+            tmarr = trigger_plus_5(tm)
+        case 4
+            tmarr = trigger_plus_4(tm)
+        case 3
+            tmarr = trigger_plus_3(tm)
+        case 2
+            tmarr = trigger_plus_2(tm)
+        case 1
+            tmarr = trigger_plus_1(tm)
+        case 0
+            tmarr = trigger_plus_0(tm)
     end
+    prob.Constraints.triggering _constr = triggering_constr; 
+
+end
+    
+
     % prob.Constraints.triggering_constr = triggering_constr;
     % [sol,fval,exitflag,output,lambda] = solve(prob);
     % if exitflag == 1
     %     u = sol;
     %     t = tmcomp(1);
     %     nTM = tm(tmcomp(1)+1:SizeOftm)
-end
-    
-
 % fevalArr = [];
 %             
 %             for c = 0:SizeOfnontmcomp %% 트리거 어디다 놓을지
