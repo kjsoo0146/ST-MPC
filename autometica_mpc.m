@@ -12,12 +12,12 @@ function [nTM, u, t] = autometica_mpc(TM, Nl, state)
     prob = optimproblem;
     x0 = optimvar('x0', param.nx);
     x = optimvar('x', param.nx, param.N);
-    u0 = optimvar('x', param.nu);
+    u0 = optimvar('u0', param.nu);
     u = optimvar('u',param.nu, (param.N)-1);
     
     cost_function =x0'*param.Q*x0+u0*param.R*u0;
     for i=1:param.N-1
-        cost_function = cost_function + x(:,i)'*param.Q*x(:,i)  + u(:,i)'*param.Q*u(:,i); % terminal cost 설정해야 됨
+        cost_function = cost_function + x(:,i)'*param.Q*x(:,i) + u(:,i)'*param.R*u(:,i); % terminal cost 설정해야 됨
     end
     prob.Objective = cost_function;
     
@@ -61,36 +61,37 @@ function [nTM, u, t] = autometica_mpc(TM, Nl, state)
     %         triggering_constr(tmcomp(i)) =  u(:,tmcomp(i)-1) ~= u(:,tmcomp(i));
     %     end
     % end
-    nontmcomp = find(~tm); 
-    SizeOfnontmcomp = size(nontmcomp);
+    nontm = find(~tm); 
+    SizeOfnontm = size(nontm);
 %--------------------------------------------------------------------------
 % nontrigger time moment in time sequence case 분류
 %--------------------------------------------------------------------------
 % 9
     tmarr = [];
-    switch SizeOfnontmcomp
+    switch SizeOfnontm
         case 9
-            tmarr = trigger_plus_9(tm)
+            [tmarr, marker] = trigger_plus_9(tm);
         case 8
-            tmarr = trigger_plus_8(tm)
+            [tmarr, marker] = trigger_plus_8(tm);
         case 7
-            tmarr = trigger_plus_7(tm)
+            [tmarr, marker] = trigger_plus_7(tm);
         case 6
-            tmarr = trigger_plus_6(tm)
+            [tmarr, marker] = trigger_plus_6(tm);
         case 5
-            tmarr = trigger_plus_5(tm)
+            [tmarr, marker] = trigger_plus_5(tm);
         case 4
-            tmarr = trigger_plus_4(tm)
+            [tmarr, marker] = trigger_plus_4(tm);
         case 3
-            tmarr = trigger_plus_3(tm)
+            [tmarr, marker] = trigger_plus_3(tm);
         case 2
-            tmarr = trigger_plus_2(tm)
+            [tmarr, marker] = trigger_plus_2(tm);
         case 1
-            tmarr = trigger_plus_1(tm)
+            [tmarr, marker] = trigger_plus_1(tm);
         case 0
-            tmarr = trigger_plus_0(tm)
+            [tmarr, marker] = trigger_plus_0(tm);
     end
-    prob.Constraints.triggering _constr = triggering_constr; 
+    SizeOftmarr = size(tmarr);
+    SizeOfmarker = size(marker);
 
 end
     
