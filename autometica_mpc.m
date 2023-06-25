@@ -1,12 +1,12 @@
-function [nTM, u, t] = autometica_mpc(TM, Nl, state)
+function [nTM, u, t] = autometica_mpc(TM, state)
 
     coder.extrinsic("optimconstr", "optimproblem", "optimvar");
 %==========================================================================
  %parameter setting
     param = load("param.mat");
     param = param.param;
-
-    param.N = Nl;
+    Nl = size(TM);
+    param.N = Nl(2);
 %==========================================================================
     %implement autometica vesion
     prob = optimproblem;
@@ -34,20 +34,19 @@ function [nTM, u, t] = autometica_mpc(TM, Nl, state)
     
 %==========================================================================
 %terminal set constraints
-    constT = optimconstr(30,Tset+1);
+    constT = optimconstr(30,param.autometica_Tset+1);
        
     LL = param.tildeF - param.tildeG*param.tildeK;
-    %% d
-    for i= 1:Tset
-        constT(:,i) = LL*(param.phi)*x(:,M+Nl)<=[1; 1;1; 1;1; 1;];
+    for i= 1:param.autometica_Tset
+        constT(:,i) = LL*(param.A_BK^(i))*param.phi(:,1:2)*x(:,param.N)<=ones(30,1);
     end
-    constT(1:param.NumOfConstr,Tset+1) = (param.F-param.G*param.K)*x(:,M+Nl)<=1;
+    constT(1:param.NumOfConstr,param.autometica_Tset+1) = (param.F-param.G*param.K)*x(:,param.N)<=1;
     prob.Constraints.ConstT = constT;
 %==========================================================================
 % triggering constraints
     SizeOfTM = size(TM);
     tm = TM(2:SizeOfTM(2));
-    SizeOftm = size(tm)
+    SizeOftm = size(tm);
     tmcomp = find(tm);
     SizeOfTmcomp = size(tmcomp);
     % triggering_constr = optimconstr(param.N);
@@ -69,7 +68,7 @@ function [nTM, u, t] = autometica_mpc(TM, Nl, state)
 %--------------------------------------------------------------------------
 % 9
     tmarr = [];
-    switch SizeOfnontm
+    switch SizeOfnontm(2)
         case 9
             [tmarr, marker] = trigger_plus_9(tm);
         case 8
@@ -94,19 +93,20 @@ function [nTM, u, t] = autometica_mpc(TM, Nl, state)
     SizeOftmarr = size(tmarr);
     SizeOfmarker = size(marker);
 
-    triggering_constr = optimconstr(param.nu, SizeOftm(2))
+    triggering_constr = optimconstr(param.nu, SizeOftm(2));
     triggering_constr(:,1) = u0 == u(:,1); %SizeOfTM == param.N
-    for i = 1:SizeFtm(2)
-        triggering_constr(i+1) = u(:,i)==u(:,i+1); %% i+1에서 triggering하면 u(:,i)~=u(:,i+1)
+    for i = 2:SizeOftm(2)
+        triggering_constr(:,i) = u(:,i-1)==u(:,i); %% i+1에서 triggering하면 u(:,i)~=u(:,i+1)
     end
     for i = 1:SizeOfmarker(2)
         for j = marker(i):marker(i+1)-1
+            tm_setting = tmarr(j,:)
             for k = 1:SizeOftm(2) %% required triggering time moment setting
-                if  tm(k) == 1
+                if  tm_setting(k) == 1
                     if k ==1
-                        triggering_constr(:,k) = u0 ~= u(:,1);
+                        triggering_constr(:,k) = u0 + u(:,1) <= 2*10000000000; %%optimconstr에서 ~=가 지원되지 않음
                     else
-                        triggering_constr(:,k) =  u(:,k-1) ~= u(:,k);
+                        triggering_constr(:,k) =  u(:,k-1) + u(:,k) <= 2*10000000000;
                     end
                 end
             end
