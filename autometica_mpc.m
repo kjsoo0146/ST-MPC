@@ -24,12 +24,12 @@ function [nTM, u, t] = autometica_mpc(TM, Nl, state)
 %==========================================================================
 % model constraints
 
-    model_constr = optimconstr((param.N)+1);
-    model_constr(1) = x(:,1) == param.A*x0 + param.B*u0;
+    model_constr = optimconstr(param.nx,(param.N)+1);
+    model_constr(:,1) = x(:,1) == param.A*x0 + param.B*u0;
     for i=1:param.N-1
-        model_constr(i+1) = x(:,i+1) == param.A*x(:,i) + param.B*u(:,i);
+        model_constr(:,i+1) = x(:,i+1) == param.A*x(:,i) + param.B*u(:,i);
     end
-    model_constr((param.N)+1) = x0 == state;
+    model_constr(:,(param.N)+1) = x0 == state;
     prob.Constraints.model_constr = model_constr;
     
 %==========================================================================
@@ -37,8 +37,9 @@ function [nTM, u, t] = autometica_mpc(TM, Nl, state)
     constT = optimconstr(30,Tset+1);
        
     LL = param.tildeF - param.tildeG*param.tildeK;
+    %% d
     for i= 1:Tset
-        constT(:,i) = LL*(param.phi^(i))*x(:,M+Nl)<=[1; 1;1; 1;1; 1;];
+        constT(:,i) = LL*(param.phi)*x(:,M+Nl)<=[1; 1;1; 1;1; 1;];
     end
     constT(1:param.NumOfConstr,Tset+1) = (param.F-param.G*param.K)*x(:,M+Nl)<=1;
     prob.Constraints.ConstT = constT;
@@ -49,8 +50,8 @@ function [nTM, u, t] = autometica_mpc(TM, Nl, state)
     SizeOftm = size(tm)
     tmcomp = find(tm);
     SizeOfTmcomp = size(tmcomp);
-    triggering_constr = optimconstr(param.N);
-    triggering_constr(1) = u0 == u(:,1);
+    % triggering_constr = optimconstr(param.N);
+    % triggering_constr(1) = u0 == u(:,1);
     % for i = 1:param.N-2
     %     triggering_constr(i+1) = u(:,i)==u(:,i+1); %% i+1에서 triggering하면 u(:,i)~=u(:,i+1)
     % end
@@ -92,6 +93,25 @@ function [nTM, u, t] = autometica_mpc(TM, Nl, state)
     end
     SizeOftmarr = size(tmarr);
     SizeOfmarker = size(marker);
+
+    triggering_constr = optimconstr(param.nu, SizeOftm(2))
+    triggering_constr(:,1) = u0 == u(:,1); %SizeOfTM == param.N
+    for i = 1:SizeFtm(2)
+        triggering_constr(i+1) = u(:,i)==u(:,i+1); %% i+1에서 triggering하면 u(:,i)~=u(:,i+1)
+    end
+    for i = 1:SizeOfmarker(2)
+        for j = marker(i):marker(i+1)-1
+            for k = 1:SizeOftm(2) %% required triggering time moment setting
+                if  tm(k) == 1
+                    if k ==1
+                        triggering_constr(:,k) = u0 ~= u(:,1);
+                    else
+                        triggering_constr(:,k) =  u(:,k-1) ~= u(:,k);
+                    end
+                end
+            end
+        end
+    end
 
 end
     

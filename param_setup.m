@@ -85,6 +85,7 @@ function param = param_setup()
     param.Kx = param.Ka(1,1:param.nx);
 
     A_BK = tildeA - tildeB*tildeK;
+    param.A_BK = A_BK;
     param.SizeOfA_BK = size(A_BK)
     param.phi = A_BK(:,(param.M-1)*(param.nx+param.nu)+1:param.SizeOfA_BK(2)); 
 
