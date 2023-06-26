@@ -112,11 +112,12 @@ function [nTM, u] = autometica_mpc(TM, state)
                 k
                 if  tm_setting(k) == 1
                     if k ==1
-                        triggering_constr(:,k) = u0 + u(:,1) <= 2*1000; %%optimconstr에서 ~=가 지원되지 않음
+                        triggering_constr(:,k) = u0 + u(:,1) <= 2*10000000000; %%optimconstr에서 ~=가 지원되지 않음
                         show(triggering_constr(:,k))
                     else
+                        u(:,k-1) + u(:,k) <= 2*10000000000
                         show(triggering_constr(:,k))
-                        triggering_constr(:,k) =  u(:,k-1) + u(:,k) <= 2*1000;
+                        triggering_constr(:,k) =  u(:,k) <= 2*10000000000;
                         show(triggering_constr(:,k))
                     end
                 else
