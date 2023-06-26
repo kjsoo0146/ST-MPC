@@ -1,4 +1,4 @@
-function [nTM, u, t] = autometica_mpc(TM, state)
+function [nTM, u] = autometica_mpc(TM, state)
 
     coder.extrinsic("optimconstr", "optimproblem", "optimvar");
 %==========================================================================
@@ -63,10 +63,9 @@ function [nTM, u, t] = autometica_mpc(TM, state)
     % end
     nontm = find(~tm); 
     SizeOfnontm = size(nontm);
-%--------------------------------------------------------------------------
+%==========================================================================
 % nontrigger time moment in time sequence case 분류
-%--------------------------------------------------------------------------
-% 9
+
     tmarr = [];
     switch SizeOfnontm(2)
         case 9
@@ -90,17 +89,26 @@ function [nTM, u, t] = autometica_mpc(TM, state)
         case 0
             [tmarr, marker] = trigger_plus_0(tm);
     end
+
+
+    %==========================================================================
     SizeOftmarr = size(tmarr);
     SizeOfmarker = size(marker);
 
-    triggering_constr = optimconstr(param.nu, SizeOftm(2));
-    triggering_constr(:,1) = u0 == u(:,1); %SizeOfTM == param.N
-    for i = 2:SizeOftm(2)
-        triggering_constr(:,i) = u(:,i-1)==u(:,i); %% i+1에서 triggering하면 u(:,i)~=u(:,i+1)
-    end
+    % triggering_constr = optimconstr(param.nu, SizeOftm(2));
+    % triggering_constr(:,1) = u0 == u(:,1); %SizeOfTM == param.N
+    % for i = 2:SizeOftm(2)
+    %     triggering_constr(:,i) = u(:,i-1)==u(:,i); %% i+1에서 triggering하면 u(:,i)~=u(:,i+1)
+    % end
+    solArr = [];
+    fvalArr = [];
+    exitflagArr = [];
     for i = 1:SizeOfmarker(2)
         for j = marker(i):marker(i+1)-1
+
             tm_setting = tmarr(j,:)
+            triggering_constr = optimconstr(param.nu, SizeOftm(2)); %tm이 정해짐
+
             for k = 1:SizeOftm(2) %% required triggering time moment setting
                 if  tm_setting(k) == 1
                     if k ==1
@@ -108,8 +116,26 @@ function [nTM, u, t] = autometica_mpc(TM, state)
                     else
                         triggering_constr(:,k) =  u(:,k-1) + u(:,k) <= 2*10000000000;
                     end
+                else
+                    if k ==1
+                        triggering_constr(:,k) = u0 + u(:,1) <= 2*10000000000; %%optimconstr에서 ~=가 지원되지 않음
+                    else
+                        triggering_constr(:,k) =  u(:,k-1) + u(:,k) <= 2*10000000000;
+                    end
                 end
             end
+            prob.Constraints.triggering_constr = triggering_constr;
+            [sol,fval,exitflag,output,lambda] = solve(prob);
+            solArr = [solArr sol];
+            fvalArr = [fvalArr fval];
+            exitflagArr = [exitflagArr exitflag];
+        end
+
+        if ~isempty(exitflagArr==1)
+            temp = min(fvalArr);
+            [row, col] = find(fvalArr == temp);
+            u=solArr(row, col).u0;
+            nTM = tmarr(:,marker(i)+col-1);
         end
     end
 
