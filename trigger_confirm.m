@@ -6,17 +6,21 @@ function [trigger, rtm] = trigger_confirm(TM)
     param = param.param;
     
     SizeOfTM = size(TM);
-    persistent tm 
+    persistent tm
+    persistent last_trigger
     if isempty(tm)==1
-        tm = TM;
+        tm = [1 0 0 0 0 1];
     end
-
+    if last_trigger == 1
+        tm = tm | TM ;
+    end
     if tm(1) == 0
         SizeOftm = size(tm);
         trigger = 0;
         tm = tm(2:SizeOftm(2));
         rtm = tm; %% nontrigger time 일때 trigger time moment는 사용되지 않는 쓰래기값이다. 
-    else
+        last_trigger=0;
+    elseif tm(1)==1
         SizeOftm = size(tm);
         trigger = 1;
         tm = tm(2:SizeOftm(2));
@@ -25,7 +29,13 @@ function [trigger, rtm] = trigger_confirm(TM)
         else
             rtm = [tm zeros(1,param.M-1), 1];
         end
-        tm = TM(2:SizeOfTM(2));
+        last_trigger=1;
     end
-
 end
+% if tm(1) == 0
+%     SizeOftm = size(tm);
+%     trigger = 0;
+%     tm = tm(2:SizeOftm(2));
+%     rtm = tm; %% nontrigger time 일때 trigger time moment는 사용되지 않는 쓰래기값이다. 
+% else
+% 
