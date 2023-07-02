@@ -1,12 +1,10 @@
-function []=test_persistent()
+function y = test_persistent(const)
     persistent t;
-    persistent arr;
     if isempty(t)==1
-        t =1;
+        t=1
+        save ('NNN.mat', 't');
+    else 
+        temp = load('NNN.mat');
+        temp = [temp temp(end)];
     end
-    if isempty(arr)==1
-        arr=[t]
-    end
-    arr = [arr t]
-    t = t+1
 end
