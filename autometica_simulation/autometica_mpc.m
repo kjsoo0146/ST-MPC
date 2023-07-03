@@ -9,9 +9,9 @@ function [nTM, input] = autometica_mpc(tm, state)
     %implement autometica vesion
     prob = optimproblem;
     x0 = optimvar('x0', param.nx);
-    x = optimvar('x', param.nx, param.N);
+    x = optimvar('x', param.nx, param.Nl);
     u0 = optimvar('u0', param.nu);
-    u = optimvar('u',param.nu, (param.N)-1);
+    u = optimvar('u',param.nu, (param.Nl)-1);
     size(u)
     cost_function =x0'*param.Q*x0+u0*param.R*u0;
     for i=1:param.Nl-1

@@ -7,7 +7,8 @@ function [control, computed_tm]= implement_autometica_mpc(trigger, state, rtm)
         computed_tm = temp_nTM;
         control = temp_control;
     elseif trigger ==0
-        computed_tm = temp_nTM(2:end);
+        temp_nTM = temp_nTM(2:end);
+        computed_tm = temp_nTM;
         control = temp_control;%%trigger가 1이 아닐때는 computed_TM은 쓰이지 않는다.
     end
     

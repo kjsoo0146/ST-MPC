@@ -37,7 +37,7 @@ function [trigger, rtm] = trigger_confirm(computed_tm)
         else
             rtm = [tm zeros(1,param.M-1), 1];
         end
-        tm
+        tm = rtm;
         last_trigger=1;
     end
 end
