@@ -14,9 +14,11 @@ function [nTM, input] = autometica_mpc(tm, state)
     u = optimvar('u',param.nu, (param.Nl)-1);
     size(u)
     cost_function =x0'*param.Q*x0+u0*param.R*u0;
+    terminal_weight = param.tildeP(13:14,13:14)
     for i=1:param.Nl-1
         cost_function = cost_function + x(:,i)'*param.Q*x(:,i) + u(:,i)'*param.R*u(:,i); % terminal cost 설정해야 됨
     end
+    cost_function = cost_function + x(:,param.Nl)'*terminal_weight*x(:,param.Nl);
     prob.Objective = cost_function;
     
 %==========================================================================
@@ -30,6 +32,14 @@ function [nTM, input] = autometica_mpc(tm, state)
     model_constr(:,(param.Nl)+1) = x0 == state;
     prob.Constraints.model_constr = model_constr;
     
+%==========================================================================
+%constraints on state and input
+    constr_ineq = optimconstr(param.NumOfConstr, param.Nl);
+    constr_ineq(:,param.Nl) = param.F*x0+param.G*u0<=1;
+    for i=2:param.Nl-1
+        constr_ineq(:,i)=param.F*x(:,i)+param.G*u(:,i)<=1;
+    end
+    prob.Constraints.constr_ineq=constr_ineq;
 %==========================================================================
 %terminal set constraints
     constT = optimconstr(30,param.autometica_Tset+1);
