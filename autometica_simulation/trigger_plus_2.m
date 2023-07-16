@@ -26,7 +26,7 @@ function [tmarr, marker] = trigger_plus_2(tm)
             tm(nontm(a1)) = 1;
             tm(nontm(a2)) = 1;
             result = [result; tm];
-            if a2 == a1+1
+            if a1==1 && a2 == a1+1
                 temp = size(result);
                 marker = [marker, temp(1)];
             end

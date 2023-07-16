@@ -26,7 +26,7 @@ function [tmarr, marker] = trigger_plus_6(tm)
             tm(nontm(a1)) = 1;
             tm(nontm(a2)) = 1;
             result = [result; tm];
-            if a2 == a1+1
+            if a1 ==1 && a2 == a1+1
                 temp = size(result);
                 marker = [marker, temp(1)];
             end
@@ -43,7 +43,7 @@ function [tmarr, marker] = trigger_plus_6(tm)
                 tm(nontm(a2)) = 1;
                 tm(nontm(a3)) = 1;
                 result = [result; tm];
-                if a3 == a2+1
+                if a1 ==1 && a2 == a1+1 && a3 == a2+1
                     temp = size(result);
                     marker = [marker, temp(1)];
                 end
@@ -63,7 +63,7 @@ function [tmarr, marker] = trigger_plus_6(tm)
                     tm(nontm(a3)) = 1;
                     tm(nontm(a4)) = 1;
                     result = [result; tm];
-                    if a4 == a3+1
+                    if a1 ==1 && a2 == a1+1 && a3 == a2+1 && a4 == a3+1
                         temp = size(result);
                         marker = [marker, temp(1)];
                     end
@@ -86,7 +86,7 @@ function [tmarr, marker] = trigger_plus_6(tm)
                         tm(nontm(a4)) = 1;
                         tm(nontm(a5)) = 1;
                         result = [result; tm];
-                        if a5 == a4+1
+                        if a1 ==1 && a2 == a1+1 && a3 == a2+1 && a4 == a3+1 && a5 == a4+1
                             temp = size(result);
                             marker = [marker, temp(1)];
                         end
@@ -112,7 +112,7 @@ function [tmarr, marker] = trigger_plus_6(tm)
                             tm(nontm(a5)) = 1;
                             tm(nontm(a6)) = 1;
                             result = [result; tm];
-                            if a6 == a5+1
+                            if a1 ==1 && a2 == a1+1 && a3 == a2+1 && a4 == a3+1 && a5 == a4+1 &&a6 == a5+1
                                 temp = size(result);
                                 marker = [marker, temp(1)];
                             end
