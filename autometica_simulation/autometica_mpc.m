@@ -1,4 +1,4 @@
-function [nTM, input] = autometica_mpc(tm, state)
+function [nTM, input, exitflagArr__] = autometica_mpc(tm, state)
 %==========================================================================
  %parameter setting
     param = load("param.mat");
@@ -14,7 +14,7 @@ function [nTM, input] = autometica_mpc(tm, state)
     u = optimvar('u',param.nu, (param.Nl)-1);
     size(u)
     cost_function =x0'*param.Q*x0+u0*param.R*u0;
-    terminal_weight = param.tildeP(13:14,13:14)
+    terminal_weight = param.tildeP(end-param.nx:end-param.nu,end-param.nx:end-param.nu);
     for i=1:param.Nl-1
         cost_function = cost_function + x(:,i)'*param.Q*x(:,i) + u(:,i)'*param.R*u(:,i); % terminal cost 설정해야 됨
     end
@@ -23,7 +23,6 @@ function [nTM, input] = autometica_mpc(tm, state)
     
 %==========================================================================
 % model constraints
-
     model_constr = optimconstr(param.nx,(param.Nl)+1);
     model_constr(:,1) = x(:,1) == param.A*x0 + param.B*u0;
     for i=1:param.Nl-1
@@ -55,18 +54,6 @@ function [nTM, input] = autometica_mpc(tm, state)
     SizeOftm = size(tm);
     tmcomp = find(tm);
     SizeOfTmcomp = size(tmcomp);
-    % triggering_constr = optimconstr(param.Nl);
-    % triggering_constr(1) = u0 == u(:,1);
-    % for i = 1:param.Nl-2
-    %     triggering_constr(i+1) = u(:,i)==u(:,i+1); %% i+1에서 triggering하면 u(:,i)~=u(:,i+1)
-    % end
-    % for i = 1:SizeOfTmcomp %% required triggering time moment setting
-    %     if tmcomp(i)==1
-    %         triggering_constr(tmcopm(i)) = u0 ~= u(:,1);
-    %     else
-    %         triggering_constr(tmcomp(i)) =  u(:,tmcomp(i)-1) ~= u(:,tmcomp(i));
-    %     end
-    % end
     nontm = find(~tm); 
     SizeOfnontm = size(nontm);
 %==========================================================================
@@ -99,46 +86,36 @@ function [nTM, input] = autometica_mpc(tm, state)
     end
 
 %==========================================================================
-
-    SizeOftmarr = size(tmarr);
+%% exitflag error 수정해야함!!
+    apSizeOftmarr = size(tmarr);
     SizeOfmarker = size(marker);
 
-    % triggering_constr = optimconstr(param.nu, SizeOftm(2));
-    % triggering_constr(:,1) = u0 == u(:,1); %SizeOfTM == param.Nl
-    % for i = 2:SizeOftm(2)
-    %     triggering_constr(:,i) = u(:,i-1)==u(:,i); %% i+1에서 triggering하면 u(:,i)~=u(:,i+1)
-    % end
-    solArr = [];
-    fvalArr = [];
-    exitflagArr = [];
     for i = 1:SizeOfmarker(2)
+        solArr = [];
+        fvalArr = [];
+        exitflagArr = [];
         for j = marker(i):marker(i+1)-1 
 
-            tm_setting = tmarr(j,:)
-            triggering_constr = optimconstr(param.nu, SizeOftm(2));%tm이 정해짐
+            tm_setting = tmarr(j,:) %tm이 정해짐
+            triggering_constr = optimconstr(param.nu, SizeOftm(2));
 
             for k = 1:SizeOftm(2) %% required triggering time moment setting
-                k
-                if  tm_setting(k) == 0
+                if  tm_setting(k) == 0 %% nontriggering time moment에서 input에 대한 constraints (u==u)
                     if k ==1
-                        triggering_constr(:,k) = u0 == u(:,1) %%optimconstr에서 ~=가 지원되지 않음
-                        show(triggering_constr(:,k))
+                        triggering_constr(:,k) = u0 == u(:,1);
                     else
-                        size(triggering_constr(:,k))
-                        size(u)
-                        triggering_constr(:,k) =  u(:,k-1) == u(:,k)
-                        show(triggering_constr(:,i))
+                        triggering_constr(:,k) =  u(:,k-1) == u(:,k);
                     end
                 end
             end
-            prob.Constraints.triggering_constr = triggering_constr
-            [sol,fval,exitflag,output,lambda] = solve(prob)
+            prob.Constraints.triggering_constr = triggering_constr;
+            [sol,fval,exitflag,output,lambda] = solve(prob);
             solArr = [solArr sol]
             fvalArr = [fvalArr fval]
             exitflagArr = [exitflagArr exitflag]
         end
-
-        if ~isempty(exitflagArr==1)
+       
+        if find(exitflagArr)
             temp = min(fvalArr);
             [row, col] = find(fvalArr == temp);
             input=solArr(row, col).u0;
@@ -146,39 +123,5 @@ function [nTM, input] = autometica_mpc(tm, state)
             return;
         end
     end
-
+    exitflagArr__ = exitflagArr;
 end
-    
-
-    % prob.Constraints.triggering_constr = triggering_constr;
-    % [sol,fval,exitflag,output,lambda] = solve(prob);
-    % if exitflag == 1
-    %     u = sol;
-    %     t = tmcomp(1);
-    %     nTM = tm(tmcomp(1)+1:SizeOftm)
-% fevalArr = [];
-%             
-%             for c = 0:SizeOfnontmcomp %% 트리거 어디다 놓을지
-%                 plustime = a
-%                 while(1)
-%                     tm(nontmcomp(c)) = 1;
-                    
-%                 for i = 1:SizeOfTmcomp %% required triggering time moment setting
-%                     if tmcomp(i)==1
-%                         triggering_constr(tmcopm(i)) = u0 ~= u(:,1);
-%                     else
-%                         triggering_constr(tmcomp(i)) =  u(:,tmcomp(i)-1) ~= u(:,tmcomp(i));
-%                     end
-%                 end
-%                 [sol, fval, exitflag, output, lambda] = solve(prob);
-               
-%                 fevalArr = [feasible exitflag];
-%                 fvalArr = [fvalArr, fval];
-%                 solArr = [solArr, sol];
-%             end
-%             feasible = find(fevalArr,1);
-%             if isempty(feasible) == 0
-%                [row col]= min(fvalArr);
-%                utemp = solarr(col);
-%                u = utemp.u0;
-%                ttemp = 

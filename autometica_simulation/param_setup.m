@@ -6,7 +6,7 @@ function param = param_setup()
     param.A = [1.1 2; 0 0.95];
     param.B = [0; 0.0787];
     param.C = [-1 1];
-    param.x0 = [3; 1];
+    param.x0 = [-7; 3];
     param.N = 5;
     param.M = 5; % 트리거 인터벌의 최대값
     
@@ -17,7 +17,7 @@ function param = param_setup()
 
     param.F = [1/param.state_upperbound 0; 0 1/param.state_upperbound; 1/param.state_lowerbound 0; 0 1/param.state_lowerbound; 0 0; 0 0];
     param.G = [0;0;0;0; 1/param.input_upperbound; 1/param.input_lowerbound];
-    SizeOfF = size(param.F)
+    SizeOfF = size(param.F);
     param.NumOfConstr = SizeOfF(1);
 
     param.nx = 2;
