@@ -3,6 +3,7 @@ function [control, computed_tm]= implement_autometica_mpc(trigger, state, rtm)
     persistent temp_nTM;
     
     if trigger == 1 %% trigger ==1 이면 MPC 연산 수행, trigger~=1이면 MPC 연산 스킵
+        
         [temp_nTM, temp_control] = autometica_mpc(rtm, state);
         computed_tm = temp_nTM;
         control = temp_control;
