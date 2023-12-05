@@ -42,14 +42,15 @@ function [nTM, input] = autometica_mpc(tm, state)
     prob.Constraints.constr_ineq=constr_ineq;
 %==========================================================================
 %terminal set constraints
-    constT = optimconstr(30,param.autometica_Tset+1);
-       
+    constT = optimconstr(30,param.autometica_Tset);
+    constT_init = optimconstr(param.nc,1);
     LL = param.tildeF - param.tildeG*param.tildeK;
     for i= 1:param.autometica_Tset
         constT(:,i) = LL*(param.A_BK^(i))*param.phi(:,1:2)*x(:,param.Nl)<=ones(30,1);
     end
-    constT(1:param.NumOfConstr,param.autometica_Tset+1) = (param.F-param.G*param.K)*x(:,param.Nl)<=1;
+    constT_init(:,1) = (param.F-param.G*param.Kx)*x(:,param.Nl)<=ones(param.nc,1);
     prob.Constraints.ConstT = constT;
+    prob.Constraints.ConstT_init = constT_init;
 %==========================================================================
 % triggering constraints
     SizeOftm = size(tm);
@@ -87,7 +88,7 @@ function [nTM, input] = autometica_mpc(tm, state)
     end
 
 %==========================================================================
-%% exitflag error 수정해야함!!
+%% 
     apSizeOftmarr = size(tmarr);
     SizeOfmarker = size(marker);
 

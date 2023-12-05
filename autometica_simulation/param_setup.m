@@ -1,33 +1,35 @@
 function param = param_setup()
 %==========================================================================
 %Heemels version
-    param.Tsim = 10;
+    param.Tsim = 40;
 
-    param.A = [1.1 2; 0 0.95];
-    param.B = [0; 0.0787];
+    param.nx = 2;
+    param.nu = 1;
+
+
+    param.A = [1.2 3;0 2 ];
+    param.B = [0.05; 0.1];
     param.C = [-1 1];
-    param.x0 = [6; -2];
+    param.x0 = [1; 0.2];
     param.N = 5;
     param.M = 5; % 트리거 인터벌의 최대값
+
+    param.Q = param.C'* param.C;
+    param.R = eye(param.nu);
     
     param.state_upperbound = 8;
     param.state_lowerbound = -8;
-    param.input_upperbound = 1;
-    param.input_lowerbound = -1;
+    param.input_upperbound = 2;
+    param.input_lowerbound = -2;
 
     param.F = [1/param.state_upperbound 0; 0 1/param.state_upperbound; 1/param.state_lowerbound 0; 0 1/param.state_lowerbound; 0 0; 0 0];
     param.G = [0;0;0;0; 1/param.input_upperbound; 1/param.input_lowerbound];
     SizeOfF = size(param.F);
     param.NumOfConstr = SizeOfF(1);
 
-    param.nx = 2;
-    param.nu = 1;
-
     temp = size(param.F);
     param.nc = temp(1);
     
-    param.Q = param.C'* param.C;
-    param.R = eye(param.nu);
     
     [P,K,L] = idare(param.A, param.B, param.Q, param.R);
     param.P = P;

@@ -3,9 +3,8 @@ function [trigger, rtm] = trigger_confirm(computed_tm)
 %%현재의 required triggering time moment sequence(tm | computed_tm) 를 구하고 
 %%self-triggered mpc 연산을 할 지 말지 결정하는 함수
 
-
 %%%% simulink에서 돌릴때 persistent variable의 사이즈가 바뀌지 않는다
-    param = load("param.mat");
+    param = load("param.mat"); % param_setting
     param = param.param;
     persistent last_trigger
     persistent tm;
@@ -29,10 +28,9 @@ function [trigger, rtm] = trigger_confirm(computed_tm)
         rtm = tm;
         last_trigger=0;
     elseif tm(1) == 1
-        SizeOftm = size(tm);
         trigger = 1;
         tm = tm(2:end);
-        if SizeOftm(2)-1>=param.M
+        if size(tm,2)-1>=param.M
             rtm = tm;
         else
             rtm = [tm zeros(1,param.M-1), 1];
