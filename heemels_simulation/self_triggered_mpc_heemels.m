@@ -25,7 +25,7 @@ function [u, t] = self_triggered_mpc_heemels(x0);
     input_upperbound = param.input_upperbound;
     input_lowerbound = param.input_lowerbound;
 
-    Tset = param.Tset;
+    Tset = 10;
 
     for jj = 0:Mmax-1
         M = Mmax - jj;

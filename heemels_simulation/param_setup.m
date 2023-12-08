@@ -1,19 +1,19 @@
 function param = param_setup()
 %==========================================================================
 %Heemels version
-    param.Tsim = 20;
+    param.Tsim = 30;
 
-    param.A = [1.1 2; 0 0.95];
-    param.B = [0; 0.0787];
+    param.A = [1.2 3;0 2 ];
+    param.B = [0.05; 0.1];
     param.C = [-1 1];
-    param.x0 = [1; 0];
+    param.x0 = [0.55; 0.15];
     param.N = 5;
     param.M = 5; % 트리거 인터벌의 최대값
     
     param.state_upperbound = 8;
     param.state_lowerbound = -8;
-    param.input_upperbound = 1;
-    param.input_lowerbound = -1;
+    param.input_upperbound = 2;
+    param.input_lowerbound = -2;
 
     param.NumOfConstr = 6;
     param.F = [1/param.state_upperbound 0; 0 1/param.state_upperbound; 1/param.state_lowerbound 0; 0 1/param.state_lowerbound; 0 0; 0 0];
@@ -31,7 +31,7 @@ function param = param_setup()
     [P,K,L] = idare(param.A, param.B, param.Q, param.R);
     param.P = P;
     param.K = K;
-    param.Tset = 4;
+    param.Tset = 10;
     param.beta = 1.1;
 %==========================================================================
 %autometica version

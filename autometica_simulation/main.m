@@ -18,8 +18,8 @@ figure(2);
 grid
 stairs(time(1:end-1), input_scope);
 
-figure(3);
 plot_f
+figure(3);
 hold on
 grid
-plot(state_scope(:,1)',state_scope(:,2)', '*')
+plot(state_scope(:,1)',state_scope(:,2)', '*r')

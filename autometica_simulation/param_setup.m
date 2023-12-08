@@ -1,7 +1,7 @@
 function param = param_setup()
 %==========================================================================
 %Heemels version
-    param.Tsim = 40;
+    param.Tsim = 30;
 
     param.nx = 2;
     param.nu = 1;
@@ -10,7 +10,7 @@ function param = param_setup()
     param.A = [1.2 3;0 2 ];
     param.B = [0.05; 0.1];
     param.C = [-1 1];
-    param.x0 = [1; 0.2];
+    param.x0 = [0.55; 0.15];
     param.N = 5;
     param.M = 5; % 트리거 인터벌의 최대값
 
