@@ -17,9 +17,3 @@ stairs(time, state_scope(:,2)');
 figure(2);
 grid
 stairs(time(1:end-1), input_scope);
-
-plot_f
-figure(3);
-hold on
-grid
-plot(state_scope(:,1)',state_scope(:,2)', '*r')

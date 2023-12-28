@@ -1,12 +1,16 @@
+clear all
+close all
+clc
+
 
 param = param_setup;
 
-F = param.F;
-G = param.G;
-A = param.A;
-B = param.B;
-Kx = param.Kx;
-M = param.M;
+F = param.F
+G = param.G
+A = param.A
+B = param.B
+Kx = param.Kx
+M = param.M
 tildeA = param.tildeA;
 tildeB = param.tildeB;
 tildeK = param.tildeK;
@@ -16,13 +20,13 @@ tildeG = param.tildeG;
 
 tildeK = param.tildeK;
 
-xmax =param.state_upperbound;
-xmin =param.state_lowerbound;
-umax =param.input_upperbound;
-umin =param.input_lowerbound;
+xmax =param.xmax;
+xmin =param.xmin;
+umax =param.umax;
+umin =param.umin;
 
 Phi = param.phi
-phi = Phi(:,1:2)
+phi = Phi(:,1:param.nx)
 
 Vx = [xmax xmax; xmax xmin; xmin xmax; xmin xmin];
 xset = Polyhedron(Vx);
@@ -60,10 +64,10 @@ uset = Polyhedron(Vu);
 Amat = @(i) (tildeF-tildeG*tildeK)*(tildeA-tildeB*tildeK)^(i)*phi;
 P =@(i) Polyhedron('A', Amat(i), 'b', ones(size(tildeF,1), 1));
 Tset = P(0);
-i = 0
+i = 0;
 while(1)
     i = i+1
-    Ptemp = P(i)
+    Ptemp = P(i);
     if Ptemp.contains(Tset) == 1
         break;
     else
@@ -72,44 +76,14 @@ while(1)
 end
 PP = Polyhedron('A', F-G*Kx, 'b', ones(size(F,1),1))
 Tset = and(Tset, PP);
-
-
+Tset.plot();
 %% Feasible set
 Fset = Tset;
-
 for i = 1:M
     Fset = inv(A)*(Fset + B*(-1*uset));
     Fset = and(Fset, xset);
 end
-
-figure(3)
+figure(1)
+Fset.plot();
 hold on
-Fset.plot('color', 'lightgreen');
-Tset.plot('color', 'lightblue', 'linewidth', 2, 'linestyle', '--');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
+Tset.plot();

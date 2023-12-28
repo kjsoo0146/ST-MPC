@@ -16,10 +16,10 @@ tildeG = param.tildeG;
 
 tildeK = param.tildeK;
 
-xmax =param.state_upperbound;
-xmin =param.state_lowerbound;
-umax =param.input_upperbound;
-umin =param.input_lowerbound;
+xmax =param.xmax;
+xmin =param.xmin;
+umax =param.umax;
+umin =param.umin;
 
 Phi = param.phi
 phi = Phi(:,1:2)
@@ -30,32 +30,12 @@ xset = Polyhedron(Vx);
 Vu = [umax; umin];
 uset = Polyhedron(Vu);
 
-[X, K, L] = idare(A,B,param.Q,param.R);
+F = param.F;
+G = param.G;
+A = param.A;
+B = param.B;
+K = param.K;
 
-% %% Heemels 
-% Amat = @(i) (F-G*K)*(A-B*K)^(i);
-% P =@(i) Polyhedron('A', Amat(i), 'b', ones(param.nc, 1));
-% 
-% Tset_H = P(0);
-% i = 0
-% while(1)
-%     i = i+1
-%     Ptemp = P(i+1)
-%     if Ptemp.contains(Tset_H) == 1
-%         break;
-%     else
-%         Tset_H = and(Tset_H, Ptemp);
-%     end
-% end
-% Fset_H = Tset_H;
-% for i = 1:5
-%     Fset_H = inv(A)*(Fset_H+ B*(-1*uset));
-%     Fset_H = and(Fset_H, xset);
-% end
-% figure(1)
-% hold on
-% Fset_H.plot()
-% Tset_H.plot('color', 'lightblue', 'linewidth', 2, 'linestyle', '--');
 %% Terminal set 
 Amat = @(i) (tildeF-tildeG*tildeK)*(tildeA-tildeB*tildeK)^(i)*phi;
 P =@(i) Polyhedron('A', Amat(i), 'b', ones(size(tildeF,1), 1));
@@ -76,40 +56,14 @@ Tset = and(Tset, PP);
 
 %% Feasible set
 Fset = Tset;
-
+Vx = [xmax xmax; xmin xmax; xmax xmin; xmin xmin];
+Vu = [umax; umin];
+xset = Polyhedron(Vx);
+uset = Polyhedron(Vu);
 for i = 1:M
     Fset = inv(A)*(Fset + B*(-1*uset));
     Fset = and(Fset, xset);
 end
-
-figure(3)
+figure(1)
 hold on
-Fset.plot('color', 'lightgreen');
-Tset.plot('color', 'lightblue', 'linewidth', 2, 'linestyle', '--');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
+Tset.plot('show_set', true, 'color', 'lightyellow', 'linewidth', 4, 'linestyle', '--')
