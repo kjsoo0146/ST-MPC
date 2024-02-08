@@ -16,4 +16,4 @@ stairs(time, state_scope(:,2)');
 
 figure(2);
 grid
-stairs(time(1:end-1), input_scope);
+stairs(time(1:end), input_scope);

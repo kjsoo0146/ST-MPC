@@ -15,9 +15,10 @@ while(1)
     [control, computed_tm]= implement_autometica_mpc(trigger, state, rtm)
     state = lti_system(control);
     T = T+1;
-    state_scope = [state_scope; transpose(state)]
-    input_scope = [input_scope; control]
+    state_scope = [state_scope; transpose(state)];
+    input_scope = [input_scope; control];
     if T == Tsim
+        input_scope = [input_scope; control];
         break;
     end
 end
