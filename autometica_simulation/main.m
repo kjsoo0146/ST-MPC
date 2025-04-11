@@ -1,7 +1,7 @@
 clc;
 clear all;
 close all;
-
+mpt_init;
 param = param_setup();
 param.autometica_Tset = param.nT;
 save('param', 'param');
